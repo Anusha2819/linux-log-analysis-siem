@@ -1,0 +1,51 @@
+{
+  "report_metadata": {
+    "analyst": "Perikala Anusha",
+    "timestamp": "2026-03-28T14:07:34.123456",
+    "system": "Kali Linux (WSL2)",
+    "tool": "Custom Python Log Analyser v1.0",
+    "portfolio": "anusha-cybersecurity-portfolio.vercel.app",
+    "github": "github.com/Anusha2819"
+  },
+  "summary": {
+    "auth_analysis": {
+      "failed_logins": 0,
+      "successful_logins": 0,
+      "sudo_usage": 120,
+      "top_ips": {},
+      "brute_force_detected": false,
+      "brute_force_ips": {}
+    },
+    "suricata_analysis": {
+      "total_alerts": 36,
+      "alert_types": {
+        "ET INFO GNU/Linux APT User-Agent Outbound likely related to package management": 36
+      },
+      "priorities": {
+        "3": 36
+      },
+      "top_src_ips": {
+        "172.30.179.191": 36
+      }
+    },
+    "threats_detected": 1
+  },
+  "threats": [
+    {
+      "timestamp": "2026-03-28 14:07:34",
+      "rule": "EXCESSIVE_SUDO_USAGE",
+      "severity": "MEDIUM",
+      "description": "120 sudo commands detected — review for privilege escalation",
+      "recommendation": "Review sudo audit trail for unauthorised privilege escalation",
+      "analyst_note": "Expected — result of SOC lab installation and configuration activity"
+    }
+  ],
+  "siem_stack": {
+    "suricata_version": "7.0.3",
+    "elasticsearch_version": "8.11.0",
+    "kibana_version": "8.11.0",
+    "filebeat_version": "8.11.0",
+    "dashboards_available": 5,
+    "total_log_events": 501
+  }
+}
