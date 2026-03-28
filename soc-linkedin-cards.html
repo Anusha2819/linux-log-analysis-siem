@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOC Lab — LinkedIn Cards</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #111318;
+  font-family: 'Inter', sans-serif;
+  padding: 40px 24px 80px;
+  color: #e2e8f0;
+}
+
+h2.page-title {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: #00d4b8;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+p.page-sub {
+  text-align: center;
+  font-size: 11px;
+  color: #4a5568;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 48px;
+  letter-spacing: 0.08em;
+}
+
+/* ── Print tip ─── */
+.print-tip {
+  text-align: center;
+  font-size: 12px;
+  color: #4a5568;
+  margin-bottom: 40px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.print-tip span {
+  color: #00d4b8;
+  border: 1px solid rgba(0,212,184,0.3);
+  padding: 6px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ── Cards grid ── */
+.cards-wrap {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Individual card ── */
+.card {
+  background: #0d1117;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #1e2d45;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  page-break-inside: avoid;
+}
+
+/* ── Card top label ── */
+.card-label {
+  background: #0a0f1a;
+  border-bottom: 1px solid #1e2d45;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  background: #00d4b8;
+  color: #0a0f1a;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+.card-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e2e8f0;
+  letter-spacing: 0.5px;
+}
+.card-badge {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #00d4b8;
+  border: 1px solid rgba(0,212,184,0.35);
+  padding: 2px 10px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+
+/* ── Kibana chrome bar ── */
+.kibana-chrome {
+  background: #1b1f2e;
+  border-bottom: 1px solid #2d3748;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 46px;
+}
+.k-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 20px;
+}
+.k-logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, #0077cc, #00d4b8);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+}
+.k-logo-text {
+  font-size: 13px; font-weight: 600; color: #a0aec0;
+  font-family: 'Inter', sans-serif;
+}
+.k-nav {
+  display: flex;
+  gap: 0;
+  height: 100%;
+}
+.k-nav-item {
+  padding: 0 16px;
+  display: flex; align-items: center;
+  font-size: 12px; color: #718096;
+  border-bottom: 2px solid transparent;
+  cursor: default;
+  height: 100%;
+}
+.k-nav-item.active {
+  color: #00d4b8;
+  border-bottom-color: #00d4b8;
+}
+.k-nav-item.active-white {
+  color: #e2e8f0;
+  border-bottom-color: #e2e8f0;
+}
+.k-search {
+  margin-left: auto;
+  background: #252d3d;
+  border: 1px solid #2d3748;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 11px;
+  color: #718096;
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 200px;
+  display: flex; align-items: center; gap: 6px;
+}
+.k-search-icon { color: #4a5568; font-size: 11px; }
+
+/* ── Discover toolbar ── */
+.discover-toolbar {
+  background: #161b27;
+  border-bottom: 1px solid #1e2d45;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.d-breadcrumb {
+  font-size: 11px; color: #718096;
+  display: flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.d-breadcrumb .active { color: #e2e8f0; }
+.d-breadcrumb .sep { color: #4a5568; }
+.d-index-badge {
+  background: rgba(0,212,184,0.1);
+  border: 1px solid rgba(0,212,184,0.25);
+  color: #00d4b8;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 3px 10px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+.d-toolbar-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+}
+.d-btn {
+  font-size: 11px; color: #a0aec0;
+  border: 1px solid #2d3748;
+  background: transparent;
+  padding: 4px 12px; border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  cursor: default;
+}
+.d-btn.save { background: #00d4b8; color: #0a0f1a; border-color: #00d4b8; font-weight: 600; }
+.d-time {
+  font-size: 10px; color: #718096;
+  font-family: 'JetBrains Mono', monospace;
+  background: #1e2d45;
+  padding: 4px 10px; border-radius: 4px;
+  border: 1px solid #2d3748;
+}
+
+/* ── KQL bar ── */
+.kql-bar {
+  background: #13192a;
+  border-bottom: 1px solid #1e2d45;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.kql-input {
+  flex: 1;
+  background: #1a2235;
+  border: 1px solid #2d3748;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 11px;
+  color: #a0aec0;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; gap: 8px;
+}
+.kql-placeholder { color: #4a5568; }
+.kql-right { display: flex; align-items: center; gap: 8px; }
+.kql-filter-btn {
+  background: rgba(0,212,184,0.08);
+  border: 1px solid rgba(0,212,184,0.25);
+  color: #00d4b8;
+  font-size: 10px; padding: 5px 12px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Stats bar ── */
+.stats-bar {
+  background: #0f1520;
+  border-bottom: 1px solid #1e2d45;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 16px;
+}
+.hits-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700;
+  color: #00d4b8;
+}
+.hits-label { font-size: 11px; color: #718096; }
+.hits-reset {
+  font-size: 11px; color: #4a5568;
+  border: 1px solid #2d3748; padding: 3px 10px; border-radius: 4px;
+}
+.break-down {
+  margin-left: auto;
+  font-size: 11px; color: #718096;
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Inter', sans-serif;
+}
+.break-down select-fake {
+  background: #1a2235;
+  border: 1px solid #2d3748;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 10px; color: #a0aec0;
+  display: inline-block;
+}
+
+/* ── Histogram ── */
+.histogram-area {
+  background: #0d1117;
+  padding: 16px 16px 8px;
+  border-bottom: 1px solid #1e2d45;
+  position: relative;
+}
+.histogram-label {
+  font-size: 10px; color: #4a5568;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* Real histogram matching the screenshot data */
+.histogram-svg-wrap { width: 100%; height: 90px; }
+
+.histogram-time-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0 0;
+  font-size: 9px; color: #4a5568;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Sidebar + table layout ── */
+.discover-body {
+  display: flex;
+  min-height: 220px;
+}
+.sidebar {
+  width: 190px;
+  border-right: 1px solid #1e2d45;
+  background: #0a0f1a;
+  padding: 12px;
+  flex-shrink: 0;
+}
+.sidebar-section { margin-bottom: 12px; }
+.sidebar-title {
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #4a5568; margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-count {
+  background: #1a2235; color: #718096;
+  font-size: 9px; padding: 1px 6px; border-radius: 10px;
+}
+.field-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 4px;
+  border-radius: 3px;
+  cursor: default;
+}
+.field-row:hover { background: #1a2235; }
+.field-type {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+.ft-date { background: rgba(0,212,184,0.15); color: #00d4b8; }
+.ft-text { background: rgba(77,166,255,0.15); color: #4da6ff; }
+.ft-kw   { background: rgba(187,134,252,0.15); color: #bb86fc; }
+.field-name {
+  font-size: 11px; color: #a0aec0;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Document table ── */
+.doc-table { flex: 1; overflow: hidden; }
+.doc-table-header {
+  background: #111827;
+  border-bottom: 1px solid #1e2d45;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.doc-tab {
+  font-size: 11px; color: #718096; padding: 4px 12px;
+  border-bottom: 2px solid transparent; cursor: default;
+}
+.doc-tab.active { color: #e2e8f0; border-bottom-color: #e2e8f0; }
+.doc-sort-label {
+  font-size: 10px; color: #4a5568;
+  font-family: 'JetBrains Mono', monospace;
+  margin-left: auto;
+}
+
+.doc-col-headers {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  background: #0f1520;
+  border-bottom: 1px solid #1e2d45;
+  padding: 6px 16px;
+  gap: 16px;
+}
+.col-h {
+  font-size: 10px; font-weight: 600; color: #718096;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 4px;
+}
+.col-h .sort-arrow { color: #00d4b8; }
+
+.doc-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  border-bottom: 1px solid rgba(30,45,69,0.5);
+  padding: 8px 16px;
+  gap: 16px;
+  align-items: flex-start;
+}
+.doc-row:hover { background: #111827; }
+.doc-row:first-child { background: rgba(0,212,184,0.03); }
+
+.doc-ts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: #00d4b8; white-space: nowrap;
+}
+.doc-content {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px; color: #8899bb; line-height: 1.5;
+  word-break: break-all;
+}
+.doc-content .tag {
+  background: rgba(0,212,184,0.12); color: #00d4b8;
+  padding: 1px 5px; border-radius: 2px; font-size: 9.5px;
+  margin: 0 2px;
+}
+.doc-content .val { color: #e2e8f0; }
+.doc-content .key { color: #bb86fc; }
+
+/* ── Dashboard card ── */
+.dash-nav {
+  background: #161b27;
+  border-bottom: 1px solid #1e2d45;
+  padding: 0 16px;
+  display: flex; align-items: center; gap: 0;
+  height: 44px;
+}
+.dash-breadcrumb {
+  font-size: 12px; color: #e2e8f0; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+}
+.dash-breadcrumb span { color: #718096; }
+.dash-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 8px;
+}
+.dash-btn {
+  font-size: 11px; color: #a0aec0;
+  border: 1px solid #2d3748;
+  background: transparent;
+  padding: 5px 14px; border-radius: 4px;
+  cursor: default;
+}
+
+.dash-filter-bar {
+  background: #13192a;
+  border-bottom: 1px solid #1e2d45;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.dash-list-header {
+  background: #0a0f1a;
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid #1e2d45;
+}
+.dlh-title {
+  font-size: 11px; font-weight: 600; color: #a0aec0;
+  font-family: 'Inter', sans-serif;
+  flex: 1;
+}
+.dlh-col { font-size: 10px; color: #4a5568; width: 120px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+.dash-item {
+  display: flex; align-items: center;
+  padding: 13px 20px;
+  border-bottom: 1px solid rgba(30,45,69,0.5);
+  gap: 14px;
+  cursor: default;
+}
+.dash-item:hover { background: #111827; }
+.dash-item-check {
+  width: 14px; height: 14px;
+  border: 1px solid #2d3748; border-radius: 3px; flex-shrink: 0;
+}
+.dash-item-info { flex: 1; min-width: 0; }
+.dash-item-name {
+  font-size: 12px; color: #4da6ff; font-family: 'Inter', sans-serif;
+  font-weight: 500; margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dash-item-desc {
+  font-size: 11px; color: #718096; font-family: 'Inter', sans-serif;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dash-item-age {
+  font-size: 11px; color: #4a5568;
+  font-family: 'JetBrains Mono', monospace;
+  width: 100px; text-align: right; flex-shrink: 0;
+}
+.dash-item-actions {
+  display: flex; gap: 6px; flex-shrink: 0;
+}
+.dash-action-btn {
+  width: 22px; height: 22px;
+  border: 1px solid #2d3748; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #4a5568;
+}
+
+.dash-pagination {
+  padding: 10px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid #1e2d45;
+  background: #0a0f1a;
+}
+.dash-rows-label { font-size: 11px; color: #718096; font-family: 'JetBrains Mono', monospace; }
+.dash-pages { display: flex; gap: 4px; align-items: center; }
+.dash-page {
+  width: 24px; height: 24px;
+  border-radius: 4px; border: 1px solid #2d3748;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #718096; font-family: 'JetBrains Mono', monospace;
+}
+.dash-page.active { background: #00d4b8; color: #0a0f1a; border-color: #00d4b8; font-weight: 700; }
+
+/* ── Viz card (chart) ── */
+.viz-toolbar {
+  background: #161b27;
+  border-bottom: 1px solid #1e2d45;
+  padding: 0 16px;
+  height: 44px;
+  display: flex; align-items: center; gap: 12px;
+}
+.viz-title {
+  font-size: 12px; font-weight: 600; color: #e2e8f0;
+}
+.viz-subtitle { font-size: 11px; color: #4da6ff; margin-left: 8px; }
+.viz-toolbar-right {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+}
+
+.viz-add-bar {
+  background: #13192a;
+  border-bottom: 1px solid #1e2d45;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.viz-add-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(0,212,184,0.1); border: 1px solid rgba(0,212,184,0.3);
+  color: #00d4b8; font-size: 11px; padding: 6px 16px; border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+}
+.viz-add-btn2 {
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid #2d3748; color: #a0aec0;
+  font-size: 11px; padding: 6px 16px; border-radius: 4px;
+  font-family: 'Inter', sans-serif; background: transparent;
+}
+.viz-controls-btn {
+  margin-left: auto;
+  border: 1px solid #2d3748; color: #718096;
+  font-size: 11px; padding: 6px 14px; border-radius: 4px;
+  font-family: 'Inter', sans-serif; background: transparent;
+}
+
+.viz-panel-header {
+  background: #0d1117;
+  padding: 10px 16px 0;
+  font-size: 11px; color: #a0aec0; font-family: 'JetBrains Mono', monospace;
+}
+.viz-panel-title { color: #e2e8f0; font-weight: 600; font-size: 12px; }
+
+.chart-area {
+  padding: 16px;
+  background: #0d1117;
+  position: relative;
+}
+.chart-y-label {
+  position: absolute;
+  left: 8px; top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-size: 9px; color: #4a5568;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  transform-origin: left center;
+}
+.chart-inner { margin-left: 28px; }
+.chart-x-label {
+  text-align: center;
+  font-size: 9px; color: #4a5568;
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 6px;
+}
+
+/* ── Analyst attribution strip ── */
+.analyst-strip {
+  background: linear-gradient(135deg, #0a0f1a 0%, #0d1117 100%);
+  border-top: 1px solid rgba(0,212,184,0.2);
+  padding: 12px 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.analyst-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #bb86fc, #4da6ff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+  font-family: 'Inter', sans-serif; flex-shrink: 0;
+}
+.analyst-info {}
+.analyst-name { font-size: 12px; font-weight: 600; color: #e2e8f0; }
+.analyst-role { font-size: 10px; color: #718096; font-family: 'JetBrains Mono', monospace; }
+.analyst-ts { margin-left: auto; font-size: 10px; color: #4a5568; font-family: 'JetBrains Mono', monospace; text-align: right; }
+.analyst-ts .date { color: #00d4b8; }
+
+/* ── Print ── */
+@media print {
+  body { background: #0d1117; padding: 0; }
+  .print-tip, h2.page-title, p.page-sub { display: none; }
+  .card { margin-bottom: 32px; page-break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<h2 class="page-title">SOC Lab — LinkedIn Screenshots</h2>
+<p class="page-sub">PERIKALA ANUSHA · KIBANA 8.11.0 · ELASTICSEARCH · MARCH 28, 2026</p>
+<div class="print-tip"><span onclick="window.print()">🖨️ Print / Save as PDF — then screenshot each card</span></div>
+
+<div class="cards-wrap">
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CARD 1: Kibana Discover — 3,353 hits                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-label">
+    <span class="card-num">01</span>
+    <span class="card-name">Kibana Discover — Security Alerts Index — 3,353 Hits</span>
+    <span class="card-badge">LIVE DATA ✓</span>
+  </div>
+
+  <!-- Kibana chrome -->
+  <div class="kibana-chrome">
+    <div class="k-logo">
+      <div class="k-logo-icon">K</div>
+      <span class="k-logo-text">elastic</span>
+    </div>
+    <div class="k-nav">
+      <div class="k-nav-item active">Discover</div>
+      <div class="k-nav-item">Dashboard</div>
+      <div class="k-nav-item">Visualize</div>
+      <div class="k-nav-item">Maps</div>
+    </div>
+    <div class="k-search">
+      <span class="k-search-icon">⌕</span>
+      <span class="kql-placeholder">Find apps, content, and more...</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="discover-toolbar">
+    <div class="d-breadcrumb">
+      <span>SOC Lab</span>
+      <span class="sep">›</span>
+      <span class="active">Perikala Anusha</span>
+      <span class="sep">›</span>
+      <span class="active">March 2026</span>
+    </div>
+    <div class="d-toolbar-right">
+      <div class="d-btn">New</div>
+      <div class="d-btn">Open</div>
+      <div class="d-btn">Share</div>
+      <div class="d-btn">Alerts</div>
+      <div class="d-btn">Inspect</div>
+      <div class="d-btn save">Save</div>
+    </div>
+  </div>
+
+  <!-- Index + KQL bar -->
+  <div class="kql-bar">
+    <div class="d-index-badge">alerts-security.alerts-default_ap</div>
+    <div class="kql-input">
+      <span class="k-search-icon">⌕</span>
+      <span class="kql-placeholder">Filter your data using KQL syntax</span>
+    </div>
+    <div class="kql-right">
+      <div class="d-time">Mar 28, 2026 @ 12:52:50.374 → Mar 28, 2026 @ 20:15:58.468</div>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <span class="hits-count">3,353</span>
+    <span class="hits-label">hits</span>
+    <span class="hits-reset">↺ Reset search</span>
+    <div class="break-down" style="margin-left:auto;font-size:11px;color:#718096;">
+      Break down by &nbsp;
+      <span style="background:#1a2235;border:1px solid #2d3748;border-radius:4px;padding:3px 10px;font-size:10px;color:#a0aec0;">Select field ▾</span>
+    </div>
+  </div>
+
+  <!-- Histogram -->
+  <div class="histogram-area">
+    <svg class="histogram-svg-wrap" viewBox="0 0 860 88" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Y grid lines -->
+      <line x1="0" y1="0"  x2="860" y2="0"  stroke="#1e2d45" stroke-width="0.5"/>
+      <line x1="0" y1="22" x2="860" y2="22" stroke="#1e2d45" stroke-width="0.5"/>
+      <line x1="0" y1="44" x2="860" y2="44" stroke="#1e2d45" stroke-width="0.5"/>
+      <line x1="0" y1="66" x2="860" y2="66" stroke="#1e2d45" stroke-width="0.5"/>
+      <line x1="0" y1="88" x2="860" y2="88" stroke="#1e2d45" stroke-width="0.5"/>
+      <!-- Y labels -->
+      <text x="2" y="10"  font-size="8" fill="#4a5568" font-family="monospace">3,300</text>
+      <text x="2" y="32"  font-size="8" fill="#4a5568" font-family="monospace">2,500</text>
+      <text x="2" y="54"  font-size="8" fill="#4a5568" font-family="monospace">1,500</text>
+      <text x="2" y="76"  font-size="8" fill="#4a5568" font-family="monospace">500</text>
+      <text x="2" y="87"  font-size="8" fill="#4a5568" font-family="monospace">0</text>
+      <!-- Bars — matching screenshot: sparse early, spike around 13:30, then steady -->
+      <rect x="36"  y="80" width="18" height="8"  fill="#00d4b8" opacity="0.3" rx="1"/>
+      <rect x="60"  y="72" width="18" height="16" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="84"  y="60" width="18" height="28" fill="#00d4b8" opacity="0.5" rx="1"/>
+      <!-- Big spike 13:30 -->
+      <rect x="108" y="4"  width="18" height="84" fill="#00d4b8" opacity="0.9" rx="1"/>
+      <rect x="132" y="12" width="18" height="76" fill="#00d4b8" opacity="0.8" rx="1"/>
+      <rect x="156" y="22" width="18" height="66" fill="#00d4b8" opacity="0.7" rx="1"/>
+      <rect x="180" y="38" width="18" height="50" fill="#00d4b8" opacity="0.6" rx="1"/>
+      <rect x="204" y="50" width="18" height="38" fill="#00d4b8" opacity="0.5" rx="1"/>
+      <rect x="228" y="58" width="18" height="30" fill="#00d4b8" opacity="0.45" rx="1"/>
+      <rect x="252" y="65" width="18" height="23" fill="#00d4b8" opacity="0.4" rx="1"/>
+      <!-- Steady middle -->
+      <rect x="276" y="68" width="18" height="20" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="300" y="70" width="18" height="18" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="324" y="68" width="18" height="20" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="348" y="72" width="18" height="16" fill="#00d4b8" opacity="0.3" rx="1"/>
+      <rect x="372" y="70" width="18" height="18" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="396" y="68" width="18" height="20" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="420" y="65" width="18" height="23" fill="#00d4b8" opacity="0.4" rx="1"/>
+      <rect x="444" y="70" width="18" height="18" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="468" y="68" width="18" height="20" fill="#00d4b8" opacity="0.35" rx="1"/>
+      <rect x="492" y="72" width="18" height="16" fill="#00d4b8" opacity="0.3" rx="1"/>
+      <rect x="516" y="70" width="18" height="18" fill="#00d4b8" opacity="0.3" rx="1"/>
+      <rect x="540" y="72" width="18" height="16" fill="#00d4b8" opacity="0.28" rx="1"/>
+      <rect x="564" y="75" width="18" height="13" fill="#00d4b8" opacity="0.25" rx="1"/>
+      <rect x="588" y="77" width="18" height="11" fill="#00d4b8" opacity="0.22" rx="1"/>
+      <rect x="612" y="79" width="18" height="9"  fill="#00d4b8" opacity="0.2" rx="1"/>
+      <rect x="636" y="80" width="18" height="8"  fill="#00d4b8" opacity="0.18" rx="1"/>
+      <rect x="660" y="81" width="18" height="7"  fill="#00d4b8" opacity="0.15" rx="1"/>
+      <rect x="684" y="82" width="18" height="6"  fill="#00d4b8" opacity="0.15" rx="1"/>
+      <rect x="708" y="83" width="18" height="5"  fill="#00d4b8" opacity="0.12" rx="1"/>
+      <rect x="732" y="84" width="18" height="4"  fill="#00d4b8" opacity="0.1" rx="1"/>
+      <rect x="756" y="85" width="18" height="3"  fill="#00d4b8" opacity="0.1" rx="1"/>
+      <rect x="780" y="85" width="18" height="3"  fill="#00d4b8" opacity="0.08" rx="1"/>
+      <rect x="804" y="86" width="18" height="2"  fill="#00d4b8" opacity="0.08" rx="1"/>
+      <rect x="828" y="86" width="18" height="2"  fill="#00d4b8" opacity="0.06" rx="1"/>
+    </svg>
+    <div class="histogram-time-labels">
+      <span>12:30 Mar 28</span>
+      <span>13:30</span>
+      <span>14:30</span>
+      <span>15:30</span>
+      <span>16:30</span>
+      <span>17:30</span>
+      <span>18:30</span>
+      <span>19:30</span>
+      <span>20:00</span>
+    </div>
+    <div style="font-size:9px;color:#4a5568;font-family:'JetBrains Mono',monospace;margin-top:4px;text-align:center;">
+      Mar 28, 2026 @ 12:52:50.374 – Mar 28, 2026 @ 20:15:58.468 · Interval: Auto – 5 minutes
+    </div>
+  </div>
+
+  <!-- Sidebar + Docs -->
+  <div class="discover-body">
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Available Fields <span class="sidebar-count">7748</span></div>
+        <div class="field-row"><div class="field-type ft-date">D</div><span class="field-name">@timestamp</span></div>
+        <div class="field-row"><div class="field-type ft-text">T</div><span class="field-name">activemq.caller</span></div>
+        <div class="field-row"><div class="field-type ft-text">T</div><span class="field-name">activemq.log.stack_trace</span></div>
+        <div class="field-row"><div class="field-type ft-text">T</div><span class="field-name">activemq.thread</span></div>
+        <div class="field-row"><div class="field-type ft-text">T</div><span class="field-name">activemq.user</span></div>
+        <div class="field-row"><div class="field-type ft-kw">K</div><span class="field-name">agent.build.original</span></div>
+        <div class="field-row"><div class="field-type ft-kw">K</div><span class="field-name">agent.ephemeral_id</span></div>
+        <div class="field-row"><div class="field-type ft-kw">K</div><span class="field-name">agent.hostname</span></div>
+        <div class="field-row"><div class="field-type ft-kw">K</div><span class="field-name">agent.id</span></div>
+        <div class="field-row"><div class="field-type ft-kw">K</div><span class="field-name">agent.name</span></div>
+        <div style="margin-top:10px;padding:6px 4px;background:rgba(0,212,184,0.06);border-radius:4px;font-size:10px;color:#00d4b8;font-family:'JetBrains Mono',monospace;text-align:center;border:1px solid rgba(0,212,184,0.15);">+ Add a field</div>
+      </div>
+    </div>
+
+    <div class="doc-table">
+      <div class="doc-table-header">
+        <div class="doc-tab active">Documents</div>
+        <div class="doc-tab">Field statistics</div>
+        <div class="doc-sort-label">↑ 1 field sorted</div>
+      </div>
+      <div class="doc-col-headers">
+        <div class="col-h">↓ @timestamp <span class="sort-arrow">↕</span></div>
+        <div class="col-h">Document</div>
+      </div>
+      <!-- Row 1 — highlighted, from screenshot -->
+      <div class="doc-row">
+        <div class="doc-ts">Mar 28, 2026 @ 20:15:58.468</div>
+        <div class="doc-content">
+          Tags: <span class="tag">metadata</span>
+          <span class="key">@timestamp</span> <span class="val">Mar 28, 2026 @ 20:15:58.468</span>
+          <span class="key">agent.ephemeral_id</span> <span class="val">4x552b97-c0f9-4376-89f…</span>
+          <span class="key">agent.hostname</span> <span class="val">PRINCY-LAPTOP</span>
+          <span class="key">agent.id</span> <span class="val">984f8645-d76f-4ce4-9277-14172bbc956…</span>
+          <span class="key">agent.name</span> <span class="val">PRINCY-LAPTOP</span>
+          <span class="key">agent.type</span> <span class="val">filebeat</span>
+          <span class="key">agent.version</span> <span class="val">8.11.0</span>
+          <span class="key">ecs.version</span> <span class="val">8.0.0…</span>
+        </div>
+      </div>
+      <div class="doc-row">
+        <div class="doc-ts">Mar 28, 2026 @ 20:10:44.231</div>
+        <div class="doc-content">
+          <span class="key">agent.hostname</span> <span class="val">PRINCY-LAPTOP</span>
+          <span class="key">agent.type</span> <span class="val">filebeat</span>
+          <span class="key">agent.version</span> <span class="val">8.11.0</span>
+          <span class="key">event.category</span> <span class="val">network</span>
+          <span class="key">event.type</span> <span class="val">alert</span>
+        </div>
+      </div>
+      <div class="doc-row">
+        <div class="doc-ts">Mar 28, 2026 @ 19:58:12.876</div>
+        <div class="doc-content">
+          <span class="key">agent.name</span> <span class="val">PRINCY-LAPTOP</span>
+          <span class="key">event.dataset</span> <span class="val">suricata.eve</span>
+          <span class="key">suricata.eve.alert.signature</span> <span class="val">ET SCAN Nmap Scripting Engine</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analyst-strip">
+    <div class="analyst-avatar">PA</div>
+    <div class="analyst-info">
+      <div class="analyst-name">Perikala Anusha</div>
+      <div class="analyst-role">SOC Analyst · Home Lab · Kibana 8.11.0</div>
+    </div>
+    <div class="analyst-ts">
+      <div class="date">Mar 28, 2026 · 20:54</div>
+      <div>localhost:5601 · Discover</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CARD 2: Kibana Visualization — Alerts Over Time chart  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-label">
+    <span class="card-num">02</span>
+    <span class="card-name">Kibana Visualization — Alerts Over Time (Count per 5 min)</span>
+    <span class="card-badge">CHART BUILT ✓</span>
+  </div>
+
+  <div class="kibana-chrome">
+    <div class="k-logo">
+      <div class="k-logo-icon">K</div>
+      <span class="k-logo-text">elastic</span>
+    </div>
+    <div class="k-nav">
+      <div class="k-nav-item">Discover</div>
+      <div class="k-nav-item active">Dashboard</div>
+      <div class="k-nav-item">Visualize</div>
+    </div>
+    <div class="k-search">
+      <span class="k-search-icon">⌕</span>
+      <span class="kql-placeholder">Find apps, content, and more...</span>
+    </div>
+  </div>
+
+  <div class="viz-toolbar">
+    <div class="dash-breadcrumb">
+      <span style="color:#718096">Dashboard</span>
+      <span style="color:#4a5568">›</span>
+      <span style="font-size:13px;font-weight:600;">Editing Alerts Over Time</span>
+      <span style="background:rgba(0,212,184,0.1);border:1px solid rgba(0,212,184,0.3);color:#00d4b8;font-size:9px;padding:2px 8px;border-radius:3px;font-family:monospace;margin-left:4px;">EDITING</span>
+    </div>
+    <div class="viz-toolbar-right">
+      <div class="d-btn">Share</div>
+      <div class="d-btn">Save as</div>
+      <div class="d-btn">Switch to view mode</div>
+    </div>
+  </div>
+
+  <div class="kql-bar">
+    <div class="kql-input">
+      <span class="k-search-icon">⌕</span>
+      <span class="kql-placeholder">Filter your data using KQL syntax</span>
+    </div>
+    <div class="d-time">Mar 28, 2026 @ 12:52:50.374 → Mar</div>
+  </div>
+
+  <div class="viz-add-bar">
+    <div class="viz-add-btn">✦ Create visualization</div>
+    <div class="viz-add-btn2">⊕ Add panel</div>
+    <div class="viz-add-btn2">⊞ Add from library</div>
+    <div class="viz-controls-btn">⚙ Controls</div>
+  </div>
+
+  <!-- Panel title -->
+  <div style="background:#111827;padding:10px 16px;border-bottom:1px solid #1e2d45;font-size:11px;font-family:'JetBrains Mono',monospace;color:#a0aec0;">
+    SOC Lab — Perikala Anusha — March 2026 &nbsp;·&nbsp; <span style="color:#4da6ff;">SOC Lab — Perikala Anusha — March 2026</span>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-area">
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+      <!-- Y axis label -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0;padding-top:4px;min-width:28px;">
+        <span style="font-size:8px;color:#4a5568;font-family:'JetBrains Mono',monospace;writing-mode:vertical-rl;transform:rotate(180deg);height:120px;text-align:center;">Count of records per second</span>
+      </div>
+      <!-- SVG Chart -->
+      <div style="flex:1;">
+        <svg width="100%" viewBox="0 0 760 130" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid -->
+          <line x1="0" y1="0"   x2="760" y2="0"   stroke="#1e2d45" stroke-width="0.5"/>
+          <line x1="0" y1="26"  x2="760" y2="26"  stroke="#1e2d45" stroke-width="0.5"/>
+          <line x1="0" y1="52"  x2="760" y2="52"  stroke="#1e2d45" stroke-width="0.5"/>
+          <line x1="0" y1="78"  x2="760" y2="78"  stroke="#1e2d45" stroke-width="0.5"/>
+          <line x1="0" y1="104" x2="760" y2="104" stroke="#1e2d45" stroke-width="0.5"/>
+          <line x1="0" y1="130" x2="760" y2="130" stroke="#1e2d45" stroke-width="0.5"/>
+          <!-- Y labels -->
+          <text x="2" y="10"  font-size="8" fill="#4a5568" font-family="monospace">25/s</text>
+          <text x="2" y="36"  font-size="8" fill="#4a5568" font-family="monospace">20/s</text>
+          <text x="2" y="62"  font-size="8" fill="#4a5568" font-family="monospace">15/s</text>
+          <text x="2" y="88"  font-size="8" fill="#4a5568" font-family="monospace">10/s</text>
+          <text x="2" y="114" font-size="8" fill="#4a5568" font-family="monospace">5/s</text>
+          <text x="2" y="130" font-size="8" fill="#4a5568" font-family="monospace">0/s</text>
+          <!-- Line chart path — matching screenshot shape: mostly flat near 0, one big spike -->
+          <polyline
+            points="30,128 60,126 90,124 120,120 150,2 180,14 210,30 240,60 270,80 300,95 330,100 360,104 390,106 420,107 450,108 480,110 510,112 540,115 570,118 600,120 630,123 660,125 690,126 720,127 750,128"
+            fill="none"
+            stroke="#00d4b8"
+            stroke-width="2"
+            stroke-linejoin="round"
+          />
+          <!-- Fill under line -->
+          <polygon
+            points="30,130 30,128 60,126 90,124 120,120 150,2 180,14 210,30 240,60 270,80 300,95 330,100 360,104 390,106 420,107 450,108 480,110 510,112 540,115 570,118 600,120 630,123 660,125 690,126 720,127 750,128 750,130"
+            fill="url(#chartGrad)"
+            opacity="0.3"
+          />
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00d4b8" stop-opacity="0.6"/>
+              <stop offset="100%" stop-color="#00d4b8" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Highlight dot at spike -->
+          <circle cx="150" cy="2" r="4" fill="#00d4b8"/>
+          <line x1="150" y1="2" x2="150" y2="130" stroke="#00d4b8" stroke-width="0.5" stroke-dasharray="3,3"/>
+        </svg>
+        <!-- X axis labels -->
+        <div style="display:flex;justify-content:space-between;padding-top:4px;font-size:9px;color:#4a5568;font-family:'JetBrains Mono',monospace;">
+          <span>12:30<br>Mar 28</span>
+          <span>13:30</span>
+          <span>14:30</span>
+          <span>15:30</span>
+          <span>16:30</span>
+          <span>17:30</span>
+          <span>18:30</span>
+          <span>19:30</span>
+        </div>
+        <div style="text-align:center;font-size:9px;color:#4a5568;font-family:'JetBrains Mono',monospace;margin-top:4px;">@timestamp per 5 minutes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analyst-strip">
+    <div class="analyst-avatar">PA</div>
+    <div class="analyst-info">
+      <div class="analyst-name">Perikala Anusha</div>
+      <div class="analyst-role">SOC Analyst · Alert Volume Visualisation Built</div>
+    </div>
+    <div class="analyst-ts">
+      <div class="date">Mar 28, 2026 · 20:54</div>
+      <div>localhost:5601 · Visualize</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- CARD 3: Kibana Dashboard List                          -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="card">
+  <div class="card-label">
+    <span class="card-num">03</span>
+    <span class="card-name">Kibana Dashboards — Filebeat Modules Loaded</span>
+    <span class="card-badge">5 DASHBOARDS ✓</span>
+  </div>
+
+  <div class="kibana-chrome">
+    <div class="k-logo">
+      <div class="k-logo-icon">K</div>
+      <span class="k-logo-text">elastic</span>
+    </div>
+    <div class="k-nav">
+      <div class="k-nav-item">Discover</div>
+      <div class="k-nav-item active">Dashboard</div>
+    </div>
+    <div class="k-search">
+      <span class="k-search-icon">⌕</span>
+      <span class="kql-placeholder">Find apps, content, and more...</span>
+    </div>
+  </div>
+
+  <div class="dash-nav">
+    <div class="dash-breadcrumb">
+      <span>Dashboard</span>
+    </div>
+    <div class="dash-right">
+      <div class="d-time" style="font-size:9px;">localhost:5601/app/dashboards#/list?g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))</div>
+    </div>
+  </div>
+
+  <div class="dash-filter-bar">
+    <div class="kql-input">
+      <span class="k-search-icon">⌕</span>
+      <span class="kql-placeholder">Filter your data using KQL syntax</span>
+    </div>
+  </div>
+
+  <!-- Dashboard list header -->
+  <div class="dash-list-header">
+    <div class="dash-item-check" style="width:14px;height:14px;border:1px solid #2d3748;border-radius:3px;flex-shrink:0;"></div>
+    <div class="dlh-title">Title</div>
+    <div class="dlh-col">Last updated</div>
+    <div style="width:60px;"></div>
+  </div>
+
+  <!-- Dashboard items — exactly from screenshot -->
+  <div class="dash-item">
+    <div class="dash-item-check"></div>
+    <div class="dash-item-info">
+      <div class="dash-item-name">[Filebeat Netflow] Conversation Partners</div>
+      <div class="dash-item-desc">Netflow conversation partners</div>
+    </div>
+    <div class="dash-item-age">8 hours ago</div>
+    <div class="dash-item-actions">
+      <div class="dash-action-btn">✏</div>
+      <div class="dash-action-btn">🗑</div>
+    </div>
+  </div>
+
+  <div class="dash-item">
+    <div class="dash-item-check"></div>
+    <div class="dash-item-info">
+      <div class="dash-item-name">[Filebeat Netflow] Autonomous Systems</div>
+      <div class="dash-item-desc">Autonomous systems Netflow</div>
+    </div>
+    <div class="dash-item-age">8 hours ago</div>
+    <div class="dash-item-actions">
+      <div class="dash-action-btn">✏</div>
+      <div class="dash-action-btn">🗑</div>
+    </div>
+  </div>
+
+  <div class="dash-item">
+    <div class="dash-item-check"></div>
+    <div class="dash-item-info">
+      <div class="dash-item-name">[Filebeat Icinga] Main Log ECS</div>
+      <div class="dash-item-desc">Filebeat Icinga module dashboard for the main log files</div>
+    </div>
+    <div class="dash-item-age">8 hours ago</div>
+    <div class="dash-item-actions">
+      <div class="dash-action-btn">✏</div>
+      <div class="dash-action-btn">🗑</div>
+    </div>
+  </div>
+
+  <div class="dash-item">
+    <div class="dash-item-check"></div>
+    <div class="dash-item-info">
+      <div class="dash-item-name">[Filebeat PostgreSQL] Query Duration Overview ECS</div>
+      <div class="dash-item-desc">Dashboard for analyzing the query durations of the Filebeat PostgreSQL module</div>
+    </div>
+    <div class="dash-item-age">8 hours ago</div>
+    <div class="dash-item-actions">
+      <div class="dash-action-btn">✏</div>
+      <div class="dash-action-btn">🗑</div>
+    </div>
+  </div>
+
+  <div class="dash-item">
+    <div class="dash-item-check"></div>
+    <div class="dash-item-info">
+      <div class="dash-item-name">[Filebeat Nginx] Ingress Controller Overview</div>
+      <div class="dash-item-desc">Dashboard for the Filebeat Nginx Ingress Controller</div>
+    </div>
+    <div class="dash-item-age">8 hours ago</div>
+    <div class="dash-item-actions">
+      <div class="dash-action-btn">✏</div>
+      <div class="dash-action-btn">🗑</div>
+    </div>
+  </div>
+
+  <div class="dash-item">
+    <div class="dash-item-check"></div>
+    <div class="dash-item-info">
+      <div class="dash-item-name">[Filebeat Auditd] Audit Events ECS</div>
+      <div class="dash-item-desc">Dashboard for the Auditd Filebeat module</div>
+    </div>
+    <div class="dash-item-age">8 hours ago</div>
+    <div class="dash-item-actions">
+      <div class="dash-action-btn">✏</div>
+      <div class="dash-action-btn">🗑</div>
+    </div>
+  </div>
+
+  <div class="dash-item">
+    <div class="dash-item-check"></div>
+    <div class="dash-item-info">
+      <div class="dash-item-name">[Filebeat CEF] Network Overview Dashboard</div>
+      <div class="dash-item-desc">Network data overview.</div>
+    </div>
+    <div class="dash-item-age">8 hours ago</div>
+    <div class="dash-item-actions">
+      <div class="dash-action-btn">✏</div>
+      <div class="dash-action-btn">🗑</div>
+    </div>
+  </div>
+
+  <div class="dash-pagination">
+    <div class="dash-rows-label">Rows per page: 20 ▾</div>
+    <div class="dash-pages">
+      <div class="dash-page">‹</div>
+      <div class="dash-page">1</div>
+      <div class="dash-page active">2</div>
+      <div class="dash-page">3</div>
+      <div class="dash-page">4</div>
+      <div class="dash-page">5</div>
+      <div class="dash-page">›</div>
+    </div>
+  </div>
+
+  <div class="analyst-strip">
+    <div class="analyst-avatar">PA</div>
+    <div class="analyst-info">
+      <div class="analyst-name">Perikala Anusha</div>
+      <div class="analyst-role">SOC Analyst · Filebeat Dashboards Deployed</div>
+    </div>
+    <div class="analyst-ts">
+      <div class="date">Mar 28, 2026 · 20:53</div>
+      <div>localhost:5601 · Dashboard</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end cards-wrap -->
+
+<div style="text-align:center;margin-top:48px;font-size:11px;color:#4a5568;font-family:'JetBrains Mono',monospace;">
+  Tip: Print → Save as PDF → screenshot each card individually for LinkedIn carousel posts
+</div>
+
+</body>
+</html>
